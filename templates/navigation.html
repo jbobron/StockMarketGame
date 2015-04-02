@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Stock Market Game</title>    
+  </head>
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="./">Stock Market Game</a>
+          <a class="navbar-text" href="/tempDashboard">Dashboard</a>
+          <a class="navbar-text" href="/portfolio">Portfolio</a>
+          <a class="navbar-text" href="/trade">Trade</a>
+          <a class="navbar-text" href="/rank">Rank</a>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="container">
+      {% block content %}
+      {% endblock %}
+    </div>
+     
+  </body>
+</html>
