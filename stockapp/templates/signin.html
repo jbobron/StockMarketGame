@@ -1,23 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Portfolio</title>
+  <title>signin</title>
   <link rel="stylesheet" href="./static/lib/css//bootstrap.min.css">
   <link rel="stylesheet" href="./static/lib/css/keen-dashboards.css">
   <link rel="stylesheet" href="./static/lib/css/dc.css">
   <link rel="stylesheet" href="./static/css/custom.css">
-
-
 </head>
 <body class="application">
   {% extends "navigation.html" %}
   {% block content %}
-
-  <h1>Portfolio</h1>
-  <h3>This is {{ session['email'] }}'s profile page<h3>
-
-
-
+    <h1>Sign In</h1>
+    {% for message in form.email.errors %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+   
+    {% for message in form.password.errors %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+     
+    <form action="{{ url_for('signin') }}" method=post>
+      {{ form.hidden_tag() }}
+       
+      {{ form.email.label }}
+      {{ form.email }}
+       
+      {{ form.password.label }}
+      {{ form.password }}
+       
+      {{ form.submit }}
+    </form>
+    <a class="navbar-text" href="/signup">Signup</a>
   {% endblock %}
   <script src="./static/lib/js/jquery.min.js"></script>
   <script src="./static/lib/js/bootstrap.min.js"></script>

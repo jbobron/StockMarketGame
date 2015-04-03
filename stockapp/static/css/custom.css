@@ -10,3 +10,21 @@
     fill: black;
     font-size: 12px;
 }
+
+/* Signup form */
+form input#firstname,
+form input#lastname,
+form input#password,
+form input#email {
+  width: 400px;
+  display: block;
+  background-color: #fafafa;
+  border-radius: 3px;
+  border: 1px solid #cccccc;
+  padding: 5px;
+  font-size: 1.1em;
+}
+ 
+form input#password {
+  margin-bottom: 10px;
+}
