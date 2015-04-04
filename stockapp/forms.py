@@ -16,8 +16,6 @@ class SignupForm(Form):
   password = PasswordField('Password', [validators.Required("Please enter a password.")])
   submit = SubmitField("Create account")
 
-
-
   def __init__(self, *args, **kwargs):
     Form.__init__(self, *args, **kwargs)
  
@@ -50,3 +48,4 @@ class SigninForm(Form):
     else:
       self.email.errors.append("Invalid e-mail or password")
       return False
+

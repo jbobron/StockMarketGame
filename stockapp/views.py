@@ -7,13 +7,13 @@ from bson import json_util
 from bson.json_util import dumps
 from models import db, User
 from forms import ContactForm, SignupForm, SigninForm
+import apiRequests
 
 MONGODB_HOST = 'localhost'
 MONGODB_PORT = 27017
 DBS_NAME = 'test_database'
 COLLECTION_NAME = 'apple' #CHANGE ME BASED ON WHAT DATA YOU WANT
 FIELDS = {"Date":True, "Open":True, "High":True, "Low":True, "Close":True, "Volume":True}
-
 
 @app.route("/")
 def index():
@@ -50,17 +50,21 @@ def testdb():
   else:
     return 'Something is broken.'
 
-# @app.route("/ticker") #parse out additional endpoint to get tickr (ex:ticker/csco)
-# def trade():
-    #parse request info from client
-    #make request to quandle
-    #wait for response 
-    #send info to client
+@app.route("/trade", methods=['POST']) #parse out additional endpoint to get tickr (ex:ticker/csco)
+def reqForStock():
+  # form = TradeSearchForm();
+  # parse request info from client
+  #validate ticker (maybe make an object of all possible tickers?)
+  ticker = request.form['input']
+  data = apiRequests.makeApiCall(ticker)
+  return render_template("trade.html", ticker=ticker, data=data)
+  # make request to quandle
+  # wait for response 
+  # send info to client
     
 # @app.route("/users/<int:userid>/") #parse out additional endpoint to get user (ex:user/andy)
 # def capture_value_int(userid):
 #     #hit mongoDB
-
 
 @app.route("/googleStockData/projects")
 def googleStockData_projects():
