@@ -1,6 +1,6 @@
 from flask_wtf import Form
 from wtforms import TextField, TextAreaField, SubmitField, ValidationError, PasswordField, validators
-from models import db, User
+from models import db, User, Portfolio, Stock, Group, UserGroups
 
 class ContactForm(Form):
   name = TextField("Name",  [validators.Required("Please enter your name.")])
@@ -48,4 +48,37 @@ class SigninForm(Form):
     else:
       self.email.errors.append("Invalid e-mail or password")
       return False
+
+
+class MakeTradeForm(Form):
+  ticker = TextField("Ticker", [validators.Required("Please enter a  ticker")])
+  quantity = TextField("Quantity", [validators.Required("Please enter a quantity")])
+  submit = SubmitField("Make Trade")
+  
+  # def __init__(self, *args, **kwargs):
+  #   Form.__init__(self, *args, **kwargs)
+ 
+  # def validate(self):
+  #   if not Form.validate(self):
+  #     return False
+# class MakeGameForm(Form):
+#   game = TextField("Game Name",  [validators.Required("Please enter your game name.")])
+#   startDate = TextField("Start Date",  [validators.Required("Please enter your start date.")])
+#   endDate = TextField("End Date",  [validators.Required("Please enter your end date.")])
+#   startingCash = TextField("Starting Cash",  [validators.Required("Please enter your starting cash.")])
+#   submit = SubmitField("Create game")
+
+#   def __init__(self, *args, **kwargs):
+#     Form.__init__(self, *args, **kwargs)
+ 
+#   def validate(self):
+#     if not Form.validate(self):
+#       return False
+     
+#     group = Group.query.filter_by(groupname = self.groupname.data.lower()).first()
+#     if user:
+#       self.email.errors.append("That group name is already taken")
+#       return False
+#     else:
+#       return True
 

@@ -24,7 +24,16 @@ form input#email {
   padding: 5px;
   font-size: 1.1em;
 }
- 
+
 form input#password {
   margin-bottom: 10px;
 }
+
+td.positive {
+    color: green;
+}
+td.negative {
+    color: red;
+}
+
+

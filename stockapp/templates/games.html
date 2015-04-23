@@ -1,34 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Trade</title>
+  <title>Games</title>
   <link rel="stylesheet" href="./static/lib/css//bootstrap.min.css">
   <link rel="stylesheet" href="./static/lib/css/keen-dashboards.css">
   <link rel="stylesheet" href="./static/lib/css/dc.css">
-  <link rel="stylesheet" href="./static/css/custom.css"> 
+  <link rel="stylesheet" href="./static/css/custom.css">
 
 </head>
 <body class="application">
   {% extends "navigation.html" %}
   {% block content %}
 
-  <h1>Trade</h1>
-
-  <h3>Enter A Ticker</h3>
-
-    <form action="" method=post>
+  <h1>Games</h1>
+  <!-- <form action="{{ url_for('games') }}" method=post>
       {{ form.hidden_tag() }}
-
-      {{ form.ticker.label }}
-      {{ form.ticker }}
-
-      {{ form.quantity.label }}
-      {{ form.quantity }}      
-
+       
+      {{ form.game.label }}
+      {{ form.gameName }}
+       
+      {{ form.startDate.label }}
+      {{ form.startDate }}
+       
+      {{ form.endDate.label }}
+      {{ form.endDate }}
+       
+      {{ form.startingCash.label }}
+      {{ form.startingCash }}
+       
       {{ form.submit }}
-    </form>
+  </form> -->
 
-   
+
   {% endblock %}
   <script src="./static/lib/js/jquery.min.js"></script>
   <script src="./static/lib/js/bootstrap.min.js"></script>

@@ -5,78 +5,81 @@ from pymongo import Connection
 import json
 from bson import json_util
 from bson.json_util import dumps
-from models import db, User
-from forms import ContactForm, SignupForm, SigninForm
+from models import db, User, Portfolio, StockHistory
+from forms import ContactForm, SignupForm, SigninForm, MakeTradeForm
 import apiRequests
-
-MONGODB_HOST = 'localhost'
-MONGODB_PORT = 27017
-DBS_NAME = 'test_database'
-COLLECTION_NAME = 'apple' #CHANGE ME BASED ON WHAT DATA YOU WANT
-FIELDS = {"Date":True, "Open":True, "High":True, "Low":True, "Close":True, "Volume":True}
+import sqlalchemy
+import time
+import helpers
 
 @app.route("/")
 def index():
   return render_template("index.html")
 
-@app.route("/tempDashboard")
-def dashBoard():
-  return checkSessionBeforeRoutingTo("tempDashboard.html")
-
 @app.route("/portfolio")
 def portfolio():
-    if 'email' not in session:
-      return redirect(url_for('signin'))
+  user = User.query.filter_by(email=session['email']).first()
+  if 'email' not in session:
+    return redirect(url_for('signin'))
+  if user is None:
+    return redirect(url_for('signin'))
+  user = User.query.filter_by(email=session['email']).first()
+  portfolio = Portfolio.query.filter_by(email=session['email']).order_by(Portfolio.last_queried.desc())
+  try:
+    first = portfolio.first()
+  except:
+    first = None
+  if first == None:
+    return render_template("portfolio.html", user=user)
+  stocks = helpers.getArrayOfStocksFromPortfolio(portfolio)
+  for stock in stocks:
+    helpers.updateCurrentPricesAndLastQueriedDateOfThisStockInPortfolio(stock)
+  helpers.updatePortfolioWorth(stocks)
+  return render_template("portfolio.html", user=user, portfolio=portfolio)
 
-    user = User.query.filter_by(email = session['email']).first()
-
-    if user is None:
-      return redirect(url_for('signin'))
+@app.route("/trade", methods=['GET','POST']) 
+def reqForStock():
+  form = MakeTradeForm()
+  # if form.validate() == False:
+    # return render_template("trade.html", form=form)
+  if request.method == 'POST':
+    ticker = str(form.ticker.data)
+    quantity = int(form.quantity.data)
+    data = apiRequests.getToday(ticker)[0]["Close"]
+    total = quantity*data;
+    # cashRemaining = total - cashRemaining;
+    table = db.session.query(User)
+    row = table.filter(User.email == session['email'])
+    record = row.one()
+    cash = record.cashRemaining
+    if cash - total > 0:
+      record.cashRemaining = cash - total
     else:
-      return render_template("portfolio.html")
+      return redirect(url_for('trade.html'))
+    db.session.flush()
+    print "STOCK PRICE", data
+    newPort = Portfolio(session['email'], form.ticker.data, form.quantity.data, data, time.strftime('%Y/%m/%d'), None, data)
+    # updateUser = update(User).where(session['email'] == User.email).values(cashRemaining=cashRemaining)
+    db.session.add(newPort)
+    db.session.commit() 
+    return redirect(url_for('portfolio')) 
+  # data = apiRequests.getHistory(ticker)
+  if request.method == 'GET':
+    return render_template("trade.html", form=form)
+
+    
+@app.route("/games", methods=['GET', 'POST'])
+def game():
+  form = MakeGameForm()
+  return render_template("games.html", form=form)
 
 @app.route("/rank")
 def rank():
     return checkSessionBeforeRoutingTo("rank.html")
 
-@app.route("/trade")
-def trade():
-    return checkSessionBeforeRoutingTo("trade.html")
-
-@app.route('/testdb')
-def testdb():
-  if db.session.query("1").from_statement("SELECT 1").all():
-    return 'It works.'
-  else:
-    return 'Something is broken.'
-
-@app.route("/trade", methods=['POST']) #parse out additional endpoint to get tickr (ex:ticker/csco)
-def reqForStock():
-  # form = TradeSearchForm();
-  # parse request info from client
-  #validate ticker (maybe make an object of all possible tickers?)
-  ticker = request.form['input']
-  data = apiRequests.makeApiCall(ticker)
-  return render_template("trade.html", ticker=ticker, data=data)
-  # make request to quandle
-  # wait for response 
-  # send info to client
-    
-# @app.route("/users/<int:userid>/") #parse out additional endpoint to get user (ex:user/andy)
-# def capture_value_int(userid):
-#     #hit mongoDB
-
-@app.route("/googleStockData/projects")
-def googleStockData_projects():
-    connection = Connection(MONGODB_HOST, MONGODB_PORT)
-    collection = connection[DBS_NAME][COLLECTION_NAME]
-    projects = collection.find(fields=FIELDS)
-    json_projects = []
-    for project in projects:
-        json_projects.append(project)
-    json_projects = json.dumps(json_projects, default=json_util.default)
-    connection.disconnect()
-    return json_projects
+@app.route("/tempDashboard")
+def dashBoard():
+  return checkSessionBeforeRoutingTo("tempDashboard.html")
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -89,12 +92,14 @@ def signup():
       if form.validate() == False:
         return render_template("signup.html", form=form)
       else:
-        newuser = User(form.firstname.data, form.lastname.data, form.email.data, form.password.data)
+        initialCash = 1000000
+        cashRemaining = 1000000
+        newuser = User(form.firstname.data, form.lastname.data, form.email.data, form.password.data, initialCash, cashRemaining, cashRemaining)
         db.session.add(newuser)
-        db.session.commit() 
+        db.session.commit()
 
         session['email'] = newuser.email
-        return redirect(url_for("portfolio"))
+        return redirect(url_for('portfolio')) 
 
         return "[1] Create a new user [2] sign in the user [3] redirect to the user's profile"
     
@@ -113,7 +118,7 @@ def signin():
       return render_template('signin.html', form=form)
     else:
       session['email'] = form.email.data
-      return redirect(url_for('profile'))
+      return redirect(url_for('portfolio')) #TODO: Load current game before redirect
                  
   elif request.method == 'GET':
     return render_template('signin.html', form=form)
@@ -126,6 +131,13 @@ def signout():
      
   session.pop('email', None)
   return redirect(url_for('index'))
+
+@app.route('/testdb')
+def testdb():
+  if db.session.query("1").from_statement("SELECT 1").all():
+    return 'It works.'
+  else:
+    return 'Something is broken.'
 
 def checkSessionBeforeRoutingTo(route):
   if 'email' not in session:

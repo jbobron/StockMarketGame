@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="./static/lib/css/keen-dashboards.css">
   <link rel="stylesheet" href="./static/lib/css/dc.css">
   <link rel="stylesheet" href="./static/css/custom.css">
+  <link rel="stylesheet" href="/style.css">
 
 
 </head>
@@ -13,10 +14,43 @@
   {% extends "navigation.html" %}
   {% block content %}
 
+
   <h1>Portfolio</h1>
-  <h3>This is {{ session['email'] }}'s profile page<h3>
+  <h3>Welcome {{ user.firstname }}<h3>
+    <h2>Cash Remaining: ${{user.cashRemaining}}</h2>
+    <h2>Portfolio Worth: ${{user.portfolioWorth}}</h2>
+    <h4> Past Trades </h4>
+  <table class="table table-hover">
+    <tr>
+      <th>Ticker</th>
+      <th>Purchase Price</th>
+      <th>Date</th>
+      <th>Quantity</th>
+      <th>Total</th>
+      <th>Current Price</th>
+      <th>Change Since Purchase</th>
+    </tr>
+    {% for trade in portfolio %}
+    <tr>
+      <td>{{ trade.ticker }}</td>
+      <td>${{ trade.price }}</td>
+      <td>{{ trade.execution_date }}</td>
+      <td>{{ trade.quantity }}</td>
+      <td>${{trade.price * trade.quantity}}</td>
+      <td>${{ trade.currentPrice }}</td>
+      {% if ((trade.currentPrice - trade.price) / trade.price) > 0 %}
+      <td class="positive"> + {{ (((trade.currentPrice - trade.price) / trade.price)*100)|round(3)}}%</td>
+      {% elif  ((trade.currentPrice - trade.price) / trade.price) < 0 %}
+      <td class="negative"> {{ (((trade.currentPrice - trade.price) / trade.price)*100)}}%</td>
+      {% else %}
+      <td class="no-change">+/- 0%</td>
+      {% endif %}
+    </tr>
+    {% endfor %}
 
-
+    {% for element in data %}
+      {{ element }}
+    {% endfor %}
 
   {% endblock %}
   <script src="./static/lib/js/jquery.min.js"></script>

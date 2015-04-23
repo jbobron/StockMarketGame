@@ -1,9 +1,15 @@
 import requests, pymongo, datetime, unicodedata
 from pymongo import MongoClient
 
-def makeApiCall(ticker):
+def getToday(ticker):
   ticker = ticker.upper()
-  r = requests.get('https://www.quandl.com/api/v1/datasets/GOOG/NASDAQ_'+ticker+'.json?auth_token=W79xnmr9AzJZd5ZKw3gy')
+  r = requests.get('https://www.quandl.com/api/v1/datasets/WIKI/'+ ticker +'.json?auth_token=ezzqdBWFN_Cm5xbN-sow?exclude_headers=true&rows=1')
+  dirtyApiData = r.json()
+  return cleanData(dirtyApiData)
+
+def getHistory(ticker):
+  ticker = ticker.upper()
+  r = requests.get('https://www.quandl.com/api/v1/datasets/GOOG/NASDAQ_'+ticker+'.json?auth_token=ezzqdBWFN_Cm5xbN-sow')
   dirtyApiData = r.json()
   return cleanData(dirtyApiData)
 
@@ -27,6 +33,17 @@ def cleanData(data):
     result.append(currentObj)
   return result
 
+def getDataSinceExecutionDate(executionDate, ticker):
+  ticker = ticker.upper()
+  r = requests.get('https://www.quandl.com/api/v1/datasets/WIKI/' + ticker + '.json?auth_token=ezzqdBWFN_Cm5xbN-sow?sort_order=asc&trim_start=' + executionDate)
+  dirtyApiData = r.json()
+  return cleanData(dirtyApiData)
+
+def getDataSinceLastQuery(lastQueryDate, ticker):
+  ticker = ticker.upper()
+  r = requests.get('https://www.quandl.com/api/v1/datasets/WIKI/' + ticker + '.json?auth_token=ezzqdBWFN_Cm5xbN-sow?sort_order=asc&trim_start=' + lastQueryDate)
+  dirtyApiData = r.json()
+  return cleanData(dirtyApiData)
 
 
 
