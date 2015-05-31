@@ -89,16 +89,18 @@ class StockHistory(db.Model):
   __tablename__ = 'stockshistory'
   id = db.Column(db.Integer, primary_key = True)
   Ticker = db.Column(db.String(100))
-  Open = db.Column(db.Float)
-  Close = db.Column(db.Float)
+  Volume = db.Column(db.Float)
   High = db.Column(db.Float)
   Low = db.Column(db.Float)
-  Volume = db.Column(db.Integer)
+  Date = db.Column(db.String(100))
+  Close = db.Column(db.Float)
+  Open = db.Column(db.Float)
 
-  def __init__(self, Ticker, Open, Close, High, Low, Volume):
+  def __init__(self, Ticker, Volume, High, Low, Date, Close, Open):
     self.Ticker = Ticker
-    self.Open = Open
-    self.Close = Close
+    self.Volume = Volume
     self.High = High
     self.Low = Low
-    self.Volume = Volume
+    self.Date = Date
+    self.Close = Close
+    self.Open = Open

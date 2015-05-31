@@ -9,7 +9,7 @@ def getToday(ticker):
 
 def getHistory(ticker):
   ticker = ticker.upper()
-  r = requests.get('https://www.quandl.com/api/v1/datasets/GOOG/NASDAQ_'+ticker+'.json?auth_token=ezzqdBWFN_Cm5xbN-sow')
+  r = requests.get('https://www.quandl.com/api/v1/datasets/GOOG/NASDAQ_'+ ticker +'.json?auth_token=ezzqdBWFN_Cm5xbN-sow')
   dirtyApiData = r.json()
   return cleanData(dirtyApiData)
 

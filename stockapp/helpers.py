@@ -34,14 +34,14 @@ def updateCurrentPricesAndLastQueriedDateOfThisStockInPortfolio(stock):
     if str(lastQueried) == todaysDate:   #if last queried date in DB is Today
       return    #skip to next stock
     else:
-      if lastQueried == None:
-        data = apiRequests.getToday(stock)
-        for row in data:
-          todaysPrice = row["Open"]
-          break
-        db.session.query(Portfolio).filter_by(ticker=stock).update({'last_queried': todaysDate})
-        db.session.query(Portfolio).filter_by(ticker=stock).update({'currentPrice': todaysPrice})
-        db.session.commit()
+      data = apiRequests.getToday(stock)
+      for row in data:
+        todaysPrice = row["Open"]
+        print "Todays Date:", todaysPrice
+        break
+      db.session.query(Portfolio).filter_by(ticker=stock).update({'last_queried': todaysDate})
+      db.session.query(Portfolio).filter_by(ticker=stock).update({'currentPrice': todaysPrice})
+      db.session.commit()
 
 
 
@@ -66,29 +66,38 @@ def updatePortfolioWorth(stocks):
   db.session.commit()
 
 
+def rowDataIsValid(row):
+  try:
+    if row["Volume"] < 1:
+      return False
+    if row["High"] < 1:
+      return False
+    if row["Low"] < 1:
+      return False
+    if len(row["Date"]) < 1:
+      return False
+    if row["Close"] < 1:
+      return False
+    if row["Open"] < 1:
+      return False
+    return True
+  except:
+    return False
 
 
-
-
-  # query = db.session.query(User).filter_by(email=session['email'])
-  # for row in query:
-  #   cashRemaining = row.cashRemaining
-  #   portfolioWorth = row.portfolioWorth
-  #   break
-  # query = db.session.query(Portfolio).filter_by(email=session['email']).filter_by(ticker=stock)
-  # for row in query:
-  #   print "CurrentPrice : ", row.currentPrice
-  #   print "price : ", row.price
-  #   currentPrice = row.currentPrice
-  #   break
-  # # get stocks current price AND price(purchase price) from Portfolio table
-  # # portfolioWorth = portfolioWorth + (currentPrice - purchasePrice)
-  # portfolioWorth = cashRemaining + currentPrice
-  # #worth = (quantity*currentPrice) + cash
-
-  # # print "UPDATED PORTFOLIO WORTH ", portfolioWorth
-  # db.session.query(User).filter_by(email=session['email']).update({'portfolioWorth': portfolioWorth})
-  # db.session.commit()
+def prepStockHistDataForFrontEnd(stockData):
+  data = []
+  for row in stockData:
+    obj = {}
+    obj["Volume"] = row.Volume
+    obj["High"] = row.High
+    obj["Low"] = row.Low
+    obj["Date"] = str(row.Date)
+    obj["Close"] = row.Close
+    obj["Open"] = row.Open
+    data.append(obj)
+  print data
+  return data
 
 
 

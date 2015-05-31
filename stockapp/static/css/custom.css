@@ -36,4 +36,8 @@ td.negative {
     color: red;
 }
 
+#data{
+  width:.2px;
+  overflow: hidden;
+}
 

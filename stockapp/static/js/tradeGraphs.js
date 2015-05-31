@@ -4,47 +4,62 @@ queue()
     .await(makeGraphs);
 
 function makeGraphs(error, projectsJson, statesJson) {
-  
   //Clean projectsJson data
-  var stockData = projectsJson;
-  // var dateFormat = d3.time.format("%Y-%m-%d");
+  var dataArray = document.getElementById('data').innerText;
+  // var jsonObj= {};
+  // for(var i = 0; i < dataArray.length; i++){
+  //   jsonObj[i] = JSON.parse("[" + i + "]");
+  //   // jsonObj[key] = dataArray[key];
+  // }
+  // var date = new Date();
+  var temp = '{"High":456, "Low":456, "Volume":45600, "Date":"2015-05-22"}'
+  var data = covertToJson(dataArray)
+  var stockData = JSON.parse(data);
+
+  console.log("hello", stockData);
+  console.log(typeof(stockData))
+  var dateFormat = d3.time.format("%Y-%m-%d");
+
   stockData.forEach(function(d) {
     // if(d['Date'].slice(0,4) === "2015") console.log(d["Date"])
-    // d["Date"] = dateFormat.parse(d["Date"]);
-    console.log(d);
-    console.log('HEEEL')
+    d["Date"] = dateFormat.parse(d["Date"]);
+    // console.log(d["Date"])
+    // console.log(d);
+    // console.log('HEEEL')
   });
 
   // //Create a Crossfilter instance
-  // var ndx = crossfilter(stockData);
+  var ndx = crossfilter(stockData);
 
   // //Define Dimensions
-  // var dateDim = ndx.dimension(function(d) { return d["Date"]; });
+  var dateDim = ndx.dimension(function(d) { return d["Date"]; });
   // var highDim = ndx.dimension(function(d) { return d["High"]; });
   // var lowDim = ndx.dimension(function(d) { return d["Low"]; });
-  // var openDim = ndx.dimension(function(d) { return d["Open"]; });
+  var openDim = ndx.dimension(function(d) { return d["Open"]; });
   // var closeDim = ndx.dimension(function(d) { return d["Close"]; });
-  // var volDim = ndx.dimension(function(d) { return d["Volume"]/1000000; });
-  // var numVolumeByDate = dateDim.group().reduceSum(function(d) { return d['Volume']/1000000; });
-  // var numOpenByDate = dateDim.group().reduceSum(function(d) { return d['Open']; });
+  var volDim = ndx.dimension(function(d) { return d["Volume"]/1000000; });
+  var numVolumeByDate = dateDim.group().reduceSum(function(d) { return d['Volume']/1000000; });
+  var numOpenByDate = dateDim.group().reduceSum(function(d) { return d['Open']; });
 
-  // var all = ndx.groupAll();
+  var all = ndx.groupAll();
 
-  // var temp = dateDim.bottom(100);
-  // var minDate = dateDim.bottom(1)[0]["Date"];
-  // var i = 0;
-  // while(minDate === null){
-  //   minDate = temp[i]["Date"];
-  //   i++;
-  // }
-  // var maxDate = dateDim.top(1)[0]["Date"];
+  var temp = dateDim.bottom(100);
+  var minDate = dateDim.bottom(1)[0]["Date"];
+  var i = 0;
+  // console.log("MinDate",minDate, "temp", temp)
+  while(minDate < temp){
+    minDate = temp[i]["Date"];
 
-  // console.log(minDate);
-  // console.log(maxDate);
+    i++;
+  }
+  var maxDate = dateDim.top(1)[0]["Date"];
+
+  console.log(minDate);
+  console.log(maxDate);
 
   //   //Charts
-  var priceChart = dc.barChart("#price-chart");
-  // var openChart = dc.barChart("#open-chart");
+  // var priceChart = dc.barChart("#price-chart");
+  var openChart = dc.barChart("#open-chart");
   // // var resourceTypeChart = dc.rowChart("#resource-type-row-chart");
   // // var povertyLevelChart = dc.rowChart("#poverty-level-row-chart");
   // // var usChart = dc.geoChoroplethChart("#us-chart");
@@ -62,29 +77,29 @@ function makeGraphs(error, projectsJson, statesJson) {
   // //   .group(totalDonations)
   // //   .formatNumber(d3.format(".3s"));
 
-  priceChart
-    .width(500)
+  // priceChart
+  //   .width(500)
+  //   .height(160)
+  //   .margins({top: 10, right: 50, bottom: 30, left: 50})
+  //   .dimension(dateDim)
+  //   .group(numVolumeByDate)  //change
+  //   .transitionDuration(500)
+  //   .x(d3.time.scale().domain([minDate, maxDate]))
+  //   .elasticY(true)
+  //   // .xAxisLabel("Year")
+  // //   .yAxis().ticks(4);
+
+  openChart
+    .width(1000)
     .height(160)
     .margins({top: 10, right: 50, bottom: 30, left: 50})
     .dimension(dateDim)
-    .group(numVolumeByDate)  //change
+    .group(numOpenByDate)  //change
     .transitionDuration(500)
     .x(d3.time.scale().domain([minDate, maxDate]))
     .elasticY(true)
     .xAxisLabel("Year")
     .yAxis().ticks(4);
-
-  // openChart
-  //   .width(500)
-  //   .height(160)
-  //   .margins({top: 10, right: 50, bottom: 30, left: 50})
-  //   .dimension(dateDim)
-  //   .group(numOpenByDate)  //change
-  //   .transitionDuration(500)
-  //   .x(d3.time.scale().domain([minDate, maxDate]))
-  //   .elasticY(true)
-  //   .xAxisLabel("Year")
-  //   .yAxis().ticks(4);
 
   // // resourceTypeChart
   // //       .width(300)
@@ -120,3 +135,10 @@ function makeGraphs(error, projectsJson, statesJson) {
     dc.renderAll();
 
 };
+
+
+
+function covertToJson(data){
+  return data.replace(/\'/g, "\"");
+}
+

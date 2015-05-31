@@ -5,7 +5,9 @@
   <link rel="stylesheet" href="./static/lib/css//bootstrap.min.css">
   <link rel="stylesheet" href="./static/lib/css/keen-dashboards.css">
   <link rel="stylesheet" href="./static/lib/css/dc.css">
-  <link rel="stylesheet" href="./static/css/custom.css"> 
+  <link rel="stylesheet" href="./static/css/custom.css">
+  <script src='./static/js/tradeGraphs.js' type='text/javascript'></script>
+  <script src="http://d3js.org/queue.v1.min.js"></script> 
 
 </head>
 <body class="application">
@@ -16,29 +18,61 @@
 
   <h3>Enter A Ticker</h3>
 
-    <form action="" method=post>
-      {{ form.hidden_tag() }}
+    <form action="" method="post">
 
-      {{ form.ticker.label }}
-      {{ form.ticker }}
-
-      {{ form.quantity.label }}
-      {{ form.quantity }}      
-
-      {{ form.submit }}
+      <label for="ticker">Ticker</label>
+      <input id="ticker" name="ticker" type="text" value="">
+      <input type="submit" name="btn" value="Search">
+      <label for="quantity">Quantity</label>
+      <input id="quantity" name="quantity" type="text" value="">      
+      <input id="submit" name="btn" type="submit" value="Make Trade">
     </form>
+  <div class="container-fluid">
+    <div class="row">
 
-   
-  {% endblock %}
+      <!-- <div class="col-sm-6"> -->
+        <div class="row">
+
+          <!-- Time Chart --> 
+          <!-- <div class="col-sm-12"> -->
+            <div class="chart-wrapper">
+              <div class="chart-title">
+                Volume Traded per Day (in millions)
+              </div>
+              <div class="chart-stage">
+                <div id="vol-chart"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Time Chart --> 
+
+         <!-- Resources Pie -->
+          <!-- <div class="col-sm-12"> -->
+            <div class="chart-wrapper">
+              <div class="chart-title">
+                Open Price
+              </div>
+              <div class="chart-stage">
+                <div id="open-chart"></div>
+              </div>
+            </div>
+          <!-- </div>/ -->
+
+    </div>
+    
+    <div id="data"> <!-- change to script tag -->
+    {{data}}
+    </div>
   <script src="./static/lib/js/jquery.min.js"></script>
   <script src="./static/lib/js/bootstrap.min.js"></script>
   <script src="./static/lib/js/crossfilter.js"></script>
   <script src="./static/lib/js/d3.js"></script>
-  <script src="./static/lib/js/dc.js"></script>
   <script src="./static/lib/js/queue.js"></script>
+  <script src="./static/lib/js/dc.js"></script>
 
 
   <script src="./static/lib/js/keen.min.js"></script>
-  <script src='./static/js/graphs.js' type='text/javascript'></script>
+  <script src='./static/js/tradeGraphs.js' type='text/javascript'></script>
+  {% endblock %}
 </body>
 </html>

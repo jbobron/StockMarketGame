@@ -11,6 +11,8 @@ import apiRequests
 import sqlalchemy
 import time
 import helpers
+import json
+from bson.json_util import dumps
 
 @app.route("/")
 def index():
@@ -23,7 +25,6 @@ def portfolio():
     return redirect(url_for('signin'))
   if user is None:
     return redirect(url_for('signin'))
-  user = User.query.filter_by(email=session['email']).first()
   portfolio = Portfolio.query.filter_by(email=session['email']).order_by(Portfolio.last_queried.desc())
   try:
     first = portfolio.first()
@@ -37,37 +38,63 @@ def portfolio():
   helpers.updatePortfolioWorth(stocks)
   return render_template("portfolio.html", user=user, portfolio=portfolio)
 
-@app.route("/trade", methods=['GET','POST']) 
+@app.route("/trade/rawdata")
+def rawData():
+  ticker = 'fb'
+  stockHistory = StockHistory.query.filter_by(Ticker=ticker)
+  data = helpers.prepStockHistDataForFrontEnd(stockHistory) #data = [{}, {}]
+  myData = []
+  for obj in data:
+    myData.append(obj)
+  json_data = json.dumps(myData, default=json_util.default)
+  return json_data
+
+@app.route("/trade", methods=['GET','POST'])
 def reqForStock():
   form = MakeTradeForm()
   # if form.validate() == False:
     # return render_template("trade.html", form=form)
   if request.method == 'POST':
-    ticker = str(form.ticker.data)
-    quantity = int(form.quantity.data)
-    data = apiRequests.getToday(ticker)[0]["Close"]
-    total = quantity*data;
-    # cashRemaining = total - cashRemaining;
-    table = db.session.query(User)
-    row = table.filter(User.email == session['email'])
-    record = row.one()
-    cash = record.cashRemaining
-    if cash - total > 0:
-      record.cashRemaining = cash - total
-    else:
-      return redirect(url_for('trade.html'))
-    db.session.flush()
-    print "STOCK PRICE", data
-    newPort = Portfolio(session['email'], form.ticker.data, form.quantity.data, data, time.strftime('%Y/%m/%d'), None, data)
-    # updateUser = update(User).where(session['email'] == User.email).values(cashRemaining=cashRemaining)
-    db.session.add(newPort)
-    db.session.commit() 
-    return redirect(url_for('portfolio')) 
-  # data = apiRequests.getHistory(ticker)
-  if request.method == 'GET':
-    return render_template("trade.html", form=form)
-
-    
+    if request.form["btn"] == "Search":
+      ticker = form.ticker.data
+      try:
+        stockHistory = StockHistory.query.filter_by(Ticker=ticker)
+        check = stockHistory.first()
+      except:
+        check = None
+      if check == None:
+        data = apiRequests.getHistory(ticker)
+        for row in data:
+          if helpers.rowDataIsValid(row):
+            newStockHist = StockHistory(ticker, row['Volume'], row['High'], row['Low'], row['Date'], row['Close'], row['Open'])
+            db.session.add(newStockHist)
+            db.session.commit()
+        return render_template("trade.html", data=data)
+      else:
+        data = helpers.prepStockHistDataForFrontEnd(stockHistory)
+        return render_template("trade.html", data=data)
+    elif request.form["btn"] == "Make Trade":
+      ticker = str(form.ticker.data)
+      quantity = int(form.quantity.data)
+      data = apiRequests.getToday(ticker)[0]["Close"]
+      total = quantity*data;
+      table = db.session.query(User)
+      row = table.filter(User.email == session['email'])
+      record = row.one()
+      cash = record.cashRemaining
+      if cash - total > 0:
+        record.cashRemaining = cash - total
+      else:
+        return redirect(url_for('trade.html'))
+      db.session.flush()
+      newPort = Portfolio(session['email'], form.ticker.data, form.quantity.data, data, time.strftime('%Y/%m/%d'), None, data)
+      db.session.add(newPort)
+      db.session.commit() 
+      return redirect(url_for('portfolio')) 
+    if request.method == 'GET':
+      return render_template("trade.html", form=form)
+  return render_template("trade.html")
+   
 @app.route("/games", methods=['GET', 'POST'])
 def game():
   form = MakeGameForm()
